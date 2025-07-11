@@ -8,12 +8,11 @@ const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
-    { name: "Home", href: "/" },
-    { name: "About Us", href: "/about" },
-    { name: "Contact Us", href: "/contact" },
-    { name: "What We Do", href: "/what-we-do" },
-    { name: "FAQ", href: "/faq" },
-    { name: "Privacy", href: "/privacy" },
+    { name: "About Us", href: "#about-us" },
+    { name: "What We Do", href: "#what-we-do" }, // Added "What We Do" back for completeness
+    { name: "FAQ", href: "#faq" },
+    { name: "Contact Us", href: "#contact-us" },
+    { name: "Register", href: "/register" }, // Link to the Register page
   ];
 
   useEffect(() => {
@@ -61,14 +60,16 @@ const Navbar = () => {
 
   return (
     <motion.nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ease-in-out`} // Removed font-serif
+      className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ease-in-out`}
       variants={navbarVariants}
       animate={scrolled ? "scrolled" : "initial"}
     >
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         {/* Brand Name/Logo */}
-        <div className="text-white text-2xl font-bold">FeedAComrade</div>
-
+        <a href="/home" className="text-white text-2xl font-bold">
+          FeedAComrade
+        </a>{" "}
+        {/* Made logo a link to home */}
         {/* Desktop Navigation Links and Donate Button */}
         <div className="hidden md:flex items-center space-x-8">
           {navLinks.map((link) => (
@@ -76,21 +77,25 @@ const Navbar = () => {
               key={link.name}
               href={link.href}
               className="text-white hover:text-gray-300 transition-colors duration-200"
+              onClick={() => setMobileMenuOpen(false)} // Close mobile menu if open (for consistency)
             >
               {link.name}
             </a>
           ))}
-          <button className="flex items-center space-x-2 px-6 py-2 bg-amber-500 text-white rounded-full shadow-lg hover:bg-amber-600 transition-colors duration-200">
-            <FaHandHoldingHeart />
-            <span>Donate</span>
-          </button>
+          {/* Donate Button - now links to /donate page */}
+          <a href="/donate">
+            <button className="flex items-center space-x-2 px-6 py-2 bg-amber-500 text-white rounded-full shadow-lg hover:bg-amber-600 transition-colors duration-200">
+              <FaHandHoldingHeart />
+              <span>Donate</span>
+            </button>
+          </a>
         </div>
-
         {/* Mobile Menu Toggle */}
         <div className="md:hidden">
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="text-white text-2xl"
+            aria-label="Toggle mobile menu"
           >
             {mobileMenuOpen ? <FaTimes /> : <FaBars />}
           </button>
@@ -110,6 +115,7 @@ const Navbar = () => {
             <button
               onClick={() => setMobileMenuOpen(false)}
               className="absolute top-4 right-4 text-white text-3xl"
+              aria-label="Close mobile menu"
             >
               <FaTimes />
             </button>
@@ -127,17 +133,20 @@ const Navbar = () => {
                 {link.name}
               </motion.a>
             ))}
-            <motion.button
-              className="flex items-center space-x-2 px-8 py-3 bg-amber-500 text-white rounded-full shadow-lg hover:bg-amber-600 transition-colors duration-200 text-xl font-bold"
-              variants={linkVariants}
-              initial="hidden"
-              animate="visible"
-              custom={navLinks.length} // Ensure it animates after other links
-              onClick={() => setMobileMenuOpen(false)} // Close menu on donate click
-            >
-              <FaHandHoldingHeart />
-              <span>Donate</span>
-            </motion.button>
+            {/* Mobile Donate Button - now links to /donate page */}
+            <a href="/donate">
+              <motion.button
+                className="flex items-center space-x-2 px-8 py-3 bg-amber-500 text-white rounded-full shadow-lg hover:bg-amber-600 transition-colors duration-200 text-xl font-bold"
+                variants={linkVariants}
+                initial="hidden"
+                animate="visible"
+                custom={navLinks.length} // Ensure it animates after other links
+                onClick={() => setMobileMenuOpen(false)} // Close menu on donate click
+              >
+                <FaHandHoldingHeart />
+                <span>Donate</span>
+              </motion.button>
+            </a>
           </motion.div>
         )}
       </AnimatePresence>

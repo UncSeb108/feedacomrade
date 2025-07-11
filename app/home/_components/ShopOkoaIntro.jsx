@@ -73,6 +73,7 @@ const ShopOkoaIntro = () => {
 
   return (
     <motion.section
+      id="what-we-do"
       className="bg-stone-100 py-16 px-4 md:py-24 font-serif text-center"
       variants={containerVariants}
       initial="hidden"
