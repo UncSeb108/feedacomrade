@@ -1,9 +1,12 @@
 require("dotenv").config();
 const express = require("express");
+const cors = require("cors"); // <-- ✅ add this
 const stkPush = require("./mpesa/stkPush");
 const callbackHandler = require("./mpesa/callback");
 
 const app = express();
+
+app.use(cors()); // <-- ✅ enable CORS globally
 app.use(express.json());
 
 // Route to trigger donation (STK push)

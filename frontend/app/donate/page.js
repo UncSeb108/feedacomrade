@@ -13,9 +13,12 @@ import {
 
 const Donate = () => {
   const predefinedAmounts = [
-    { id: "10", amount: 10, label: "$10 - One Week of Meals" },
-    { id: "25", amount: 25, label: "$25 - One Month of Meals" },
-    { id: "50", amount: 50, label: "$50 - Support a Comrade for a Semester" },
+    { id: "10", amount: 10, label: "KES 10" },
+    { id: "50", amount: 50, label: "KES 50" },
+    { id: "100", amount: 100, label: "KES 100" },
+    { id: "200", amount: 200, label: "KES 200" },
+    { id: "500", amount: 500, label: "KES 500" },
+    { id: "1000", amount: 1000, label: "KES 1000" },
   ];
 
   const [selectedAmount, setSelectedAmount] = useState(null);
@@ -25,7 +28,7 @@ const Donate = () => {
   const [expiryDate, setExpiryDate] = useState("");
   const [cvv, setCvv] = useState("");
   const [mpesaPhoneNumber, setMpesaPhoneNumber] = useState("");
-
+  const [loading, setLoading] = useState(false);
   const [donationSuccess, setDonationSuccess] = useState(false);
   const [errors, setErrors] = useState({});
 
@@ -138,36 +141,108 @@ const Donate = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setDonationSuccess(false); // Reset success message
 
     if (validateForm()) {
       const finalAmount = selectedAmount || parseFloat(customAmount);
-      console.log("Donation Amount:", finalAmount);
-      console.log("Payment Method:", paymentMethod);
 
       if (paymentMethod === "credit_card") {
         console.log("Card Number:", cardNumber);
         console.log("Expiry Date:", expiryDate);
         console.log("CVV:", cvv);
+        setDonationSuccess(true); // simulate success
       } else if (paymentMethod === "mpesa") {
-        console.log("Mpesa Phone Number:", mpesaPhoneNumber);
+        try {
+          setLoading(true);
+
+          const response = await fetch("https://3364a0ee62a3.ngrok-free.app/api/donate", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              phone: mpesaPhoneNumber.startsWith("254")
+                ? mpesaPhoneNumber
+                : "254" + mpesaPhoneNumber.slice(1),
+              amount: finalAmount,
+            }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok && data.checkoutRequestId) {
+            const checkoutRequestId = data.checkoutRequestId;
+            let attempts = 0;
+            const maxAttempts = 30;
+
+            const pollStatus = async () => {
+              try {
+                const res = await fetch(`https://3364a0ee62a3.ngrok-free.app/api/status/${checkoutRequestId}`);
+                const result = await res.json();
+
+                if (result.status === "success") {
+                  setDonationSuccess(true);
+                  setLoading(false);
+                  return;
+                } else if (result.status === "failed") {
+                  alert("M-Pesa transaction failed: " + result.message);
+                  setLoading(false);
+                  return;
+                }
+
+                if (attempts < maxAttempts) {
+                  attempts++;
+                  setTimeout(pollStatus, 1000); // wait 1s and try again
+                } else {
+                  alert("Timeout: No response from user or Safaricom.");
+                  setLoading(false);
+                }
+              } catch (pollError) {
+                console.error("Polling error:", pollError);
+                setLoading(false);
+              }
+            };
+
+            pollStatus(); // start checking status
+          } else {
+            alert(data.error || "Failed to initiate M-Pesa request.");
+            setLoading(false);
+          }
+        } catch (error) {
+          console.error("M-Pesa request error:", error);
+          alert("Network error during M-Pesa payment.");
+          setLoading(false);
+        }
       }
 
-      // Simulate payment processing
-      setDonationSuccess(true);
-      // Reset form fields
-      setSelectedAmount(null);
-      setCustomAmount("");
-      setPaymentMethod("");
-      setCardNumber("");
-      setExpiryDate("");
-      setCvv("");
-      setMpesaPhoneNumber("");
-      setErrors({});
+      // Clear form if not loading
+      if (!loading) {
+        setSelectedAmount(null);
+        setCustomAmount("");
+        setPaymentMethod("");
+        setCardNumber("");
+        setExpiryDate("");
+        setCvv("");
+        setMpesaPhoneNumber("");
+        setErrors({});
+      }
     }
   };
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-90 z-50">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-amber-500"></div>
+          <p className="text-lg font-semibold text-emerald-700">
+            Processing M-Pesa request...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div
