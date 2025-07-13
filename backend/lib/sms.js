@@ -9,9 +9,9 @@ const sendSMS = async (phone, message) => {
       to: [phone],
       message,
     });
-    console.log("📤 SMS sent:", result);
+    console.log("SMS sent:", result);
   } catch (error) {
-    console.error("❌ Failed to send SMS:", error.message);
+    console.error("Failed to send SMS:", error.message);
   }
 };
 

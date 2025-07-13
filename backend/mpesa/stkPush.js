@@ -1,7 +1,6 @@
 const axios = require("axios");
 const generateAccessToken = require("./acessToken");
 
-// ✅ Helper to get current timestamp in format YYYYMMDDHHMMSS
 const getTimestamp = () => {
   const now = new Date();
   return (
@@ -14,20 +13,21 @@ const getTimestamp = () => {
   );
 };
 
-// ✅ Helper to generate password
 const generatePassword = (timestamp) => {
-  const shortCode = process.env.SHORTCODE;
-  const passkey = process.env.PASSKEY;
+  const shortCode = process.env.MPESA_PAYBILL;
+  const passkey = process.env.MPESA_PASSKEY;
   return Buffer.from(shortCode + passkey + timestamp).toString("base64");
 };
 
-// ✅ Exporting route handler to be used in /api/donate
 module.exports = async (req, res) => {
   try {
     const { phone, amount } = req.body;
+    const parsedAmount = parseInt(amount);
 
-    if (!phone || !amount) {
-      return res.status(400).json({ error: "Phone and amount are required." });
+    if (!phone || isNaN(parsedAmount) || parsedAmount <= 0) {
+      return res
+        .status(400)
+        .json({ error: "Valid phone and amount are required." });
     }
 
     const timestamp = getTimestamp();
@@ -35,39 +35,42 @@ module.exports = async (req, res) => {
     const token = await generateAccessToken();
 
     const payload = {
-      BusinessShortCode: process.env.SHORTCODE,
+      BusinessShortCode: process.env.MPESA_PAYBILL,
       Password: password,
       Timestamp: timestamp,
       TransactionType: "CustomerPayBillOnline",
-      Amount: amount,
+      Amount: parsedAmount,
       PartyA: phone,
-      PartyB: process.env.SHORTCODE,
+      PartyB: process.env.MPESA_PAYBILL,
       PhoneNumber: phone,
       CallBackURL: process.env.CALLBACK_URL,
       AccountReference: "FeedTheirFuture",
       TransactionDesc: "Donation",
     };
 
-    console.log("📤 Sending STK Push payload:", payload);
+    console.log("Sending STK Push payload:", payload);
 
     const response = await axios.post(
-      "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest",
+      "https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest",
       payload,
       {
         headers: {
           Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
       }
     );
 
-    console.log("✅ STK Push initiated:", response.data);
+    console.log("STK Push initiated:", response.data);
     res.status(200).json({
       message: "STK push initiated successfully",
       data: response.data,
     });
   } catch (error) {
-    const safError = error.response?.data || error.message;
-    console.error("🔥 STK Push Error:", safError);
-    res.status(500).json({ error: "Failed to initiate STK push." });
+    const safError = error.response?.data || error.message || "Unknown error";
+    console.error("STK Push Error:", safError);
+    res
+      .status(500)
+      .json({ error: "Failed to initiate STK push.", details: safError });
   }
 };
