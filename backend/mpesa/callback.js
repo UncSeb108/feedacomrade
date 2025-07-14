@@ -1,5 +1,6 @@
 const supabase = require("../lib/supabaseClient");
 const sendSMS = require("../lib/sms");
+const normalizePhone = require("../lib/normalizePhone.js");
 
 const callbackHandler = async (req, res) => {
   console.log("M-Pesa callback received:", JSON.stringify(req.body, null, 2));
@@ -29,11 +30,12 @@ const callbackHandler = async (req, res) => {
       return res.status(400).json({ message: "Incomplete donation data" });
     }
 
+    const normalizedPhone = normalizePhone(phone);
+
     console.log(
-      `Donation of KES ${amount} from ${phone} | Receipt: ${receipt}`
+      `Donation of KES ${amount} from ${normalizedPhone} | Receipt: ${receipt}`
     );
 
-    // Prevent duplicate insertion
     const { data: existing, error: checkError } = await supabase
       .from("donations")
       .select("id")
@@ -47,7 +49,7 @@ const callbackHandler = async (req, res) => {
 
     const { error } = await supabase
       .from("donations")
-      .insert([{ amount, phone, receipt_number: receipt }]);
+      .insert([{ amount, phone: normalizedPhone, receipt_number: receipt }]);
 
     if (error) {
       console.error("Failed to save donation to Supabase:", error.message);
@@ -58,7 +60,7 @@ const callbackHandler = async (req, res) => {
 
     try {
       const message = `Thank you for your donation of KES ${amount}. Receipt: ${receipt}`;
-      const smsRes = await sendSMS(phone, message);
+      const smsRes = await sendSMS(normalizedPhone, message);
       console.log("SMS sent:", smsRes);
     } catch (smsError) {
       console.warn("Failed to send SMS:", smsError.message || smsError);

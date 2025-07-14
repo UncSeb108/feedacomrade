@@ -2,14 +2,15 @@ require("dotenv").config();
 const express = require("express");
 const stkPush = require("./mpesa/stkPush");
 const callbackHandler = require("./mpesa/callback");
+const register = require("./auth/register");
+const login = require("./auth/login");
 
 const app = express();
 app.use(express.json());
 
-// Route to trigger donation (STK push)
 app.post("/api/donate", stkPush);
-
-// Callback endpoint for M-Pesa
+app.post("/api/register", register);
+app.post("/api/login", login);
 app.post("/api/callback", callbackHandler);
 
 const PORT = process.env.PORT || 5000;
