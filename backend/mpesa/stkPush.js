@@ -33,7 +33,7 @@ module.exports = async (req, res) => {
         .json({ error: "Valid phone and amount are required." });
     }
 
-    // ✅ Normalize phone to Safaricom expected format (e.g., 2547XXXXXXXX)
+    // Normalize phone to Safaricom expected format (e.g., 2547XXXXXXXX)
     const normalizedPhone = normalizePhone(phone, { format: "mpesa" });
 
     const timestamp = getTimestamp();

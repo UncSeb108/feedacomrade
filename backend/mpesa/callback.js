@@ -1,7 +1,7 @@
 const supabase = require("../lib/supabaseClient");
 const sendSMS = require("../lib/sms");
 const normalizePhone = require("../lib/normalizePhone.js");
-const generateReceipt = require("../lib/generateReceipt"); // ✅ Added
+const generateReceipt = require("../lib/generateReceipt"); 
 
 const callbackHandler = async (req, res) => {
   console.log("M-Pesa callback received:", JSON.stringify(req.body, null, 2));
@@ -59,7 +59,7 @@ const callbackHandler = async (req, res) => {
 
     console.log("Donation saved to Supabase");
 
-    // ✅ Generate the donation receipt
+    // Generate the donation receipt
     try {
       await generateReceipt({
         name: "Anonymous",
@@ -72,7 +72,7 @@ const callbackHandler = async (req, res) => {
       console.warn("PDF generation failed:", pdfErr.message);
     }
 
-    // ✅ Send SMS with receipt download link
+    // Send SMS with receipt download link
     try {
       const receiptUrl = `https://your-live-domain.com/api/receipts/receipt_${receipt}.pdf`; // Replace this with your actual domain
       const message = `Thank you for donating KES ${amount}. Download your receipt here: ${receiptUrl}`;
@@ -82,7 +82,7 @@ const callbackHandler = async (req, res) => {
       console.warn("Failed to send SMS:", smsError.message || smsError);
     }
 
-    // ✅ Respond with downloadable receipt URL
+    // Respond with downloadable receipt URL
     return res.status(200).json({
       message: "Donation saved and receipt generated.",
       receipt_url: `/api/receipts/receipt_${receipt}.pdf`,

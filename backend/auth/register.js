@@ -42,7 +42,6 @@ module.exports = async (req, res) => {
       return res.status(500).json({ error: "Failed to create user." });
     }
 
-    // Return user info (excluding password)
     res.status(201).json({
       message: "User registered successfully",
       user: {

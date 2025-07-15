@@ -3,13 +3,13 @@ const africastalking = require("africastalking")({
   username: process.env.AFRICASTALKING_USERNAME,
 });
 
-const normalizePhone = require("./normalizePhone"); // 🔄 Use updated version
+const normalizePhone = require("./normalizePhone"); 
 
 const sendSMS = async (phone, message) => {
   try {
     if (!phone || !message) throw new Error("Phone or message missing");
 
-    // ✅ Normalize to Africa's Talking preferred format: +2547..., +2541...
+    //  Normalize to Africa's Talking preferred format: +2547..., +2541...
     const normalizedPhone = normalizePhone(phone, { format: "sms" });
 
     const result = await africastalking.SMS.send({
