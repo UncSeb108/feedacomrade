@@ -1,4 +1,5 @@
 "use client";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -18,6 +19,9 @@ const Login = ({ switchToRegister }) => {
   });
   const [errors, setErrors] = useState({});
   const [loginSuccess, setLoginSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
+  const router = useRouter();
 
   // Keep itemVariants for general use if needed elsewhere, but not directly on input wrappers here
   const itemVariants = {
@@ -74,15 +78,42 @@ const Login = ({ switchToRegister }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoginSuccess(false);
+    setApiError("");
+    setLoading(true);
 
     if (validateForm()) {
-      // Simulate API call or login logic
-      console.log("Login Data:", formData);
-      setLoginSuccess(true);
-      // In a real app, you'd redirect or set user context here
+      try {
+        const response = await fetch("http://localhost:5000/api/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          setLoginSuccess(true);
+          // In a real app, you'd store the token and redirect
+          // localStorage.setItem("token", data.token);
+          router.push("/home");
+        } else {
+          setApiError(data.error || "An unexpected error occurred.");
+        }
+      } catch (error) {
+        setApiError(
+          "Failed to connect to the server. Please try again later."
+        );
+      } finally {
+        setLoading(false);
+      }
+    }
+    else {
+      setLoading(false);
     }
   };
 
@@ -111,6 +142,20 @@ const Login = ({ switchToRegister }) => {
           <strong className="font-bold">Success!</strong>
           <span className="block sm:inline ml-2">
             You have successfully logged in.
+          </span>
+        </motion.div>
+      )}
+
+      {apiError && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6"
+          role="alert"
+        >
+          <strong className="font-bold">Error!</strong>
+          <span className="block sm:inline ml-2">
+            {apiError}
           </span>
         </motion.div>
       )}
@@ -171,12 +216,35 @@ const Login = ({ switchToRegister }) => {
 
         <motion.button
           type="submit"
-          className="w-full flex items-center justify-center space-x-2 px-8 py-3 text-lg font-bold text-white bg-amber-500 rounded-md shadow-lg hover:bg-amber-600 focus:outline-none focus:ring-4 focus:ring-amber-300 transition-all duration-300 ease-in-out"
+          className="w-full flex items-center justify-center space-x-2 px-8 py-3 text-lg font-bold text-white bg-amber-500 rounded-md shadow-lg hover:bg-amber-600 focus:outline-none focus:ring-4 focus:ring-amber-300 transition-all duration-300 ease-in-out disabled:bg-gray-400"
           variants={buttonVariants}
-          whileHover="hover"
-          whileTap="tap"
+          whileHover={!loading ? "hover" : ""}
+          whileTap={!loading ? "tap" : ""}
+          disabled={loading}
         >
-          <span>Login</span>
+          {loading ? (
+            <svg
+              className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+          ) : null}
+          <span>{loading ? "Logging in..." : "Login"}</span>
         </motion.button>
       </form>
 
@@ -207,6 +275,8 @@ const Register = () => {
 
   const [errors, setErrors] = useState({});
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
 
   // Framer Motion variants for section entrance
   const sectionVariants = {
@@ -289,23 +359,50 @@ const Register = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setRegistrationSuccess(false); // Reset success message
+    setRegistrationSuccess(false);
+    setApiError("");
+    setLoading(true);
 
     if (validateForm()) {
-      // Simulate API call or registration logic
-      console.log("Registration Data:", formData);
-      setRegistrationSuccess(true);
-      // Optionally reset form after successful submission
-      setFormData({
-        name: "",
-        email: "",
-        password: "",
-        username: "",
-        role: "comrade",
-      });
-      setErrors({}); // Clear any remaining errors
+      try {
+        const response = await fetch("http://localhost:5000/api/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          setRegistrationSuccess(true);
+          setFormData({
+            name: "",
+            email: "",
+            password: "",
+            username: "",
+            role: "comrade",
+          });
+          setErrors({});
+          setTimeout(() => {
+            setCurrentView("login");
+          }, 2000);
+        } else {
+          setApiError(data.error || "An unexpected error occurred.");
+        }
+      } catch (error) {
+        setApiError(
+          "Failed to connect to the server. Please try again later."
+        );
+      } finally {
+        setLoading(false);
+      }
+    }
+    else {
+      setLoading(false);
     }
   };
 
