@@ -31,7 +31,7 @@ const Donate = () => {
   const [loading, setLoading] = useState(false);
   const [donationSuccess, setDonationSuccess] = useState(false);
   const [errors, setErrors] = useState({});
-
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
   // Framer Motion variants for section entrance
   const sectionVariants = {
     hidden: { opacity: 0, y: 50 },
@@ -157,7 +157,7 @@ const Donate = () => {
         try {
           setLoading(true);
 
-          const response = await fetch("https://3364a0ee62a3.ngrok-free.app/api/donate", {
+          const response = await fetch(`${baseUrl}/api/donate`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -172,14 +172,21 @@ const Donate = () => {
 
           const data = await response.json();
 
-          if (response.ok && data.checkoutRequestId) {
-            const checkoutRequestId = data.checkoutRequestId;
+          if (response.ok && data.data?.checkoutRequestId) {
+            const checkoutRequestId = data.data.checkoutRequestId;
             let attempts = 0;
             const maxAttempts = 30;
 
             const pollStatus = async () => {
               try {
-                const res = await fetch(`https://3364a0ee62a3.ngrok-free.app/api/status/${checkoutRequestId}`);
+                const res = await fetch(`${baseUrl}/api/status/${checkoutRequestId}`);
+                const contentType = res.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                  // Log the actual response for debugging
+                  const text = await res.text();
+                  console.error("Non-JSON response from backend:", text);
+                  throw new Error("Server did not return JSON. Check backend.");
+                }
                 const result = await res.json();
 
                 if (result.status === "success") {
@@ -194,18 +201,20 @@ const Donate = () => {
 
                 if (attempts < maxAttempts) {
                   attempts++;
-                  setTimeout(pollStatus, 1000); // wait 1s and try again
+                  setTimeout(pollStatus, 1000); // wait 1s
                 } else {
-                  alert("Timeout: No response from user or Safaricom.");
+                  alert("Timeout: No response from user.");
                   setLoading(false);
                 }
-              } catch (pollError) {
-                console.error("Polling error:", pollError);
+              } catch (err) {
+                console.error("Polling error:", err);
                 setLoading(false);
+                alert("Error: " + err.message);
               }
             };
 
-            pollStatus(); // start checking status
+            pollStatus();
+
           } else {
             alert(data.error || "Failed to initiate M-Pesa request.");
             setLoading(false);

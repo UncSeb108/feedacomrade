@@ -62,15 +62,48 @@ module.exports = async (req, res) => {
     );
 
     console.log("STK Push initiated:", response.data);
-    res.status(200).json({
-      message: "STK push initiated successfully",
-      data: response.data,
-    });
+
+    if (
+      response.data.ResponseCode === "0" &&
+      response.data.CheckoutRequestID
+    ) {
+      return res.status(200).json({
+        message: "STK push initiated successfully",
+        data: {
+          checkoutRequestId: response.data.CheckoutRequestID,
+        },
+      });
+    } else {
+      // Safaricom responded but did not initiate STK push
+      return res.status(400).json({
+        error: "Failed to initiate STK Push",
+        details: response.data,
+      });
+    }
   } catch (error) {
-    const safError = error.response?.data || error.message || "Unknown error";
-    console.error("STK Push Error:", safError);
-    res
-      .status(500)
-      .json({ error: "Failed to initiate STK push.", details: safError });
+    if (error.response) {
+      // Safaricom responded with a status code outside 2xx
+      console.error("Safaricom API Error:");
+      console.error("Status:", error.response.status);
+      console.error("Data:", error.response.data);
+      return res.status(500).json({
+        error: "Safaricom API Error",
+        status: error.response.status,
+        details: error.response.data,
+      });
+    } else if (error.request) {
+      // Request was made but no response
+      console.error("No response from Safaricom:", error.request);
+      return res.status(500).json({
+        error: "No response from Safaricom",
+      });
+    } else {
+      // Something else happened
+      console.error("Error setting up STK Push:", error.message);
+      return res.status(500).json({
+        error: "Error setting up STK Push",
+        message: error.message,
+      });
+    }
   }
 };

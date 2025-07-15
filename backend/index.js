@@ -16,4 +16,16 @@ app.post("/api/donate", stkPush);
 app.post("/api/callback", callbackHandler);
 
 const PORT = process.env.PORT || 5000;
+const statusMap = require("./statusMap");
+
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.get("/api/status/:id", (req, res) => {
+  const result = statusMap.get(req.params.id);
+  if (result) {
+    console.log("STATUS CHECK:", req.params.id, result);
+    return res.json(result);
+  } else {
+    console.log("STATUS PENDING:", req.params.id);
+    return res.json({ status: "pending" });
+  }
+});
