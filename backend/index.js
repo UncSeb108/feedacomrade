@@ -15,7 +15,7 @@ const app = express();
 
 // Middleware
 app.use(helmet());
-app.use(cors({ origin: "https://your-frontend.com" })); // update nikishadeploy front end pia
+app.use(cors({ origin: "http://localhost:3000" })); // Allow requests from the frontend development server
 app.use(morgan("combined"));
 app.use(compression());
 app.use(express.json());
@@ -24,7 +24,10 @@ const apiLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
 app.use("/api/", apiLimiter);
 
 // Routes
-app.post("/api/donate", stkPush);
+app.post("/api/donate", (req, res, next) => {
+  console.log("Received donation request:", req.body);
+  stkPush(req, res, next);
+});
 app.post("/api/register", register);
 app.post("/api/login", login);
 app.post("/api/callback", callbackHandler);
@@ -35,7 +38,7 @@ app.use((req, res) => res.status(404).json({ error: "Route not found" }));
 
 // Error handler
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error("Error stack:", err.stack);
   res.status(500).json({ error: "Internal Server Error" });
 });
 
