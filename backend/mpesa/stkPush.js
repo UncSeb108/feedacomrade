@@ -1,6 +1,8 @@
 const axios = require("axios");
 const generateAccessToken = require("./acessToken");
+const normalizePhone = require("../lib/normalizePhone.js");
 
+// Helper to generate timestamp in YYYYMMDDHHMMSS format
 const getTimestamp = () => {
   const now = new Date();
   return (
@@ -13,6 +15,7 @@ const getTimestamp = () => {
   );
 };
 
+// Helper to generate Base64-encoded password for M-Pesa
 const generatePassword = (timestamp) => {
   const shortCode = process.env.MPESA_PAYBILL;
   const passkey = process.env.MPESA_PASSKEY;
@@ -30,6 +33,9 @@ module.exports = async (req, res) => {
         .json({ error: "Valid phone and amount are required." });
     }
 
+    // Normalize phone to Safaricom expected format (e.g., 2547XXXXXXXX)
+    const normalizedPhone = normalizePhone(phone, { format: "mpesa" });
+
     const timestamp = getTimestamp();
     const password = generatePassword(timestamp);
     const token = await generateAccessToken();
@@ -40,9 +46,9 @@ module.exports = async (req, res) => {
       Timestamp: timestamp,
       TransactionType: "CustomerPayBillOnline",
       Amount: parsedAmount,
-      PartyA: phone,
+      PartyA: normalizedPhone,
       PartyB: process.env.MPESA_PAYBILL,
-      PhoneNumber: phone,
+      PhoneNumber: normalizedPhone,
       CallBackURL: process.env.CALLBACK_URL,
       AccountReference: "FeedTheirFuture",
       TransactionDesc: "Donation",
@@ -69,8 +75,9 @@ module.exports = async (req, res) => {
   } catch (error) {
     const safError = error.response?.data || error.message || "Unknown error";
     console.error("STK Push Error:", safError);
-    res
-      .status(500)
-      .json({ error: "Failed to initiate STK push.", details: safError });
+    res.status(500).json({
+      error: "Failed to initiate STK push.",
+      details: safError,
+    });
   }
 };

@@ -28,6 +28,8 @@ const Donate = () => {
 
   const [donationSuccess, setDonationSuccess] = useState(false);
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
 
   // Framer Motion variants for section entrance
   const sectionVariants = {
@@ -138,34 +140,57 @@ const Donate = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setDonationSuccess(false); // Reset success message
+    setDonationSuccess(false);
+    setApiError("");
+    setLoading(true);
 
     if (validateForm()) {
       const finalAmount = selectedAmount || parseFloat(customAmount);
-      console.log("Donation Amount:", finalAmount);
-      console.log("Payment Method:", paymentMethod);
 
-      if (paymentMethod === "credit_card") {
-        console.log("Card Number:", cardNumber);
-        console.log("Expiry Date:", expiryDate);
-        console.log("CVV:", cvv);
-      } else if (paymentMethod === "mpesa") {
-        console.log("Mpesa Phone Number:", mpesaPhoneNumber);
+      if (paymentMethod === "mpesa") {
+        console.log("Sending donation request with:", {
+          amount: finalAmount,
+          phone: mpesaPhoneNumber,
+        });
+        try {
+          const response = await fetch('http://localhost:5000/api/donate', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              amount: finalAmount,
+              phone: mpesaPhoneNumber,
+            }),
+          });
+
+          const data = await response.json();
+          console.log("Received response:", data);
+
+          if (response.ok) {
+            setDonationSuccess(true);
+            setSelectedAmount(null);
+            setCustomAmount("");
+            setPaymentMethod("");
+            setMpesaPhoneNumber("");
+            setErrors({});
+          } else {
+            setApiError(data.error || "An unexpected error occurred.");
+          }
+        } catch (error) {
+          console.error("Fetch error:", error);
+          setApiError("Failed to connect to the server. Please try again later.");
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        // Handle other payment methods if necessary
+        setLoading(false);
       }
-
-      // Simulate payment processing
-      setDonationSuccess(true);
-      // Reset form fields
-      setSelectedAmount(null);
-      setCustomAmount("");
-      setPaymentMethod("");
-      setCardNumber("");
-      setExpiryDate("");
-      setCvv("");
-      setMpesaPhoneNumber("");
-      setErrors({});
+    } else {
+      setLoading(false);
     }
   };
 
@@ -234,6 +259,20 @@ const Donate = () => {
               <strong className="font-bold">Thank You!</strong>
               <span className="block sm:inline ml-2">
                 Your donation has been successfully processed.
+              </span>
+            </motion.div>
+          )}
+
+          {apiError && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6"
+              role="alert"
+            >
+              <strong className="font-bold">Error!</strong>
+              <span className="block sm:inline ml-2">
+                {apiError}
               </span>
             </motion.div>
           )}
@@ -506,13 +545,37 @@ const Donate = () => {
             {/* Donate Now Button */}
             <motion.button
               type="submit"
-              className="w-full flex items-center justify-center space-x-2 px-8 py-3 text-lg font-bold text-white bg-amber-500 rounded-md shadow-lg hover:bg-amber-600 focus:outline-none focus:ring-4 focus:ring-amber-300 transition-all duration-300 ease-in-out"
+              className="w-full flex items-center justify-center space-x-2 px-8 py-3 text-lg font-bold text-white bg-amber-500 rounded-md shadow-lg hover:bg-amber-600 focus:outline-none focus:ring-4 focus:ring-amber-300 transition-all duration-300 ease-in-out disabled:bg-gray-400"
               variants={buttonVariants}
-              whileHover="hover"
-              whileTap="tap"
+              whileHover={!loading ? "hover" : ""}
+              whileTap={!loading ? "tap" : ""}
+              disabled={loading}
             >
-              <FaHandHoldingHeart className="text-xl" />
-              <span>Donate Now</span>
+              {loading ? (
+                <svg
+                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+              ) : (
+                <FaHandHoldingHeart className="text-xl" />
+              )}
+              <span>{loading ? "Processing..." : "Donate Now"}</span>
             </motion.button>
           </form>
         </motion.div>
