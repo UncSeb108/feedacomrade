@@ -15,7 +15,16 @@ const app = express();
 
 // Middleware
 app.use(helmet());
-app.use(cors({ origin: "http://localhost:3000" })); // Allow requests from the frontend development server
+app.use(
+  cors({
+    origin: [
+      "https://www.foodforcomrade.com",
+      "https://foodforcomrade.com"
+    ],
+    methods: ["GET", "POST"],
+    credentials: true,
+  })
+);
 app.use(morgan("combined"));
 app.use(compression());
 app.use(express.json());

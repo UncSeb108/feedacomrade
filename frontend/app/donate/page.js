@@ -155,7 +155,7 @@ const Donate = () => {
           phone: mpesaPhoneNumber,
         });
         try {
-          const response = await fetch('http://localhost:5000/api/donate', {
+          const response = await fetch("https://feedacomrade-xvzyr.ondigitalocean.app/api/donate", {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
