@@ -247,7 +247,7 @@ const Login = ({ switchToRegister }) => {
       </form>
 
       <p className="text-center text-stone-700 mt-6">
-        Don't have an account?{" "}
+        Don&apos;t have an account?{" "}
         <button
           onClick={switchToRegister}
           className="text-emerald-700 hover:underline font-semibold focus:outline-none"
