@@ -86,13 +86,16 @@ const Login = ({ switchToRegister }) => {
 
     if (validateForm()) {
       try {
-        const response = await fetch("http://localhost:5000/api/login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        });
+        const response = await fetch(
+          "https://feedacomrade-xvzyr.ondigitalocean.app/api/login",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+          }
+        );
 
         const data = await response.json();
 
@@ -105,14 +108,11 @@ const Login = ({ switchToRegister }) => {
           setApiError(data.error || "An unexpected error occurred.");
         }
       } catch (error) {
-        setApiError(
-          "Failed to connect to the server. Please try again later."
-        );
+        setApiError("Failed to connect to the server. Please try again later.");
       } finally {
         setLoading(false);
       }
-    }
-    else {
+    } else {
       setLoading(false);
     }
   };
@@ -154,9 +154,7 @@ const Login = ({ switchToRegister }) => {
           role="alert"
         >
           <strong className="font-bold">Error!</strong>
-          <span className="block sm:inline ml-2">
-            {apiError}
-          </span>
+          <span className="block sm:inline ml-2">{apiError}</span>
         </motion.div>
       )}
 
@@ -367,13 +365,16 @@ const Register = () => {
 
     if (validateForm()) {
       try {
-        const response = await fetch("http://localhost:5000/api/register", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        });
+        const response = await fetch(
+          "https://feedacomrade-xvzyr.ondigitalocean.app/api/register",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+          }
+        );
 
         const data = await response.json();
 
@@ -394,14 +395,11 @@ const Register = () => {
           setApiError(data.error || "An unexpected error occurred.");
         }
       } catch (error) {
-        setApiError(
-          "Failed to connect to the server. Please try again later."
-        );
+        setApiError("Failed to connect to the server. Please try again later.");
       } finally {
         setLoading(false);
       }
-    }
-    else {
+    } else {
       setLoading(false);
     }
   };
