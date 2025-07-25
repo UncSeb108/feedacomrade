@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaBars, FaTimes, FaHandHoldingHeart } from "react-icons/fa";
+import Image from "next/image"; // Import Next.js Image component
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -9,10 +10,10 @@ const Navbar = () => {
 
   const navLinks = [
     { name: "About Us", href: "#about-us" },
-    { name: "What We Do", href: "#what-we-do" }, // Added "What We Do" back for completeness
+    { name: "What We Do", href: "#what-we-do" },
     { name: "FAQ", href: "#faq" },
     { name: "Contact Us", href: "#contact-us" },
-    { name: "Register", href: "/register" }, // Link to the Register page
+    { name: "Register", href: "/register" },
   ];
 
   useEffect(() => {
@@ -66,10 +67,23 @@ const Navbar = () => {
     >
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         {/* Brand Name/Logo */}
-        <a href="/home" className="text-white text-2xl font-bold">
-          FeedAComrade
-        </a>{" "}
-        {/* Made logo a link to home */}
+        <a href="/home" className="flex items-center space-x-2">
+          {" "}
+          {/* Use flex to align logo and text */}
+          <div className="relative w-10 h-10">
+            {" "}
+            {/* Container for the rounded image */}
+            <Image
+              src="/images/logo.jpeg"
+              alt="Feed A Comrade Logo"
+              layout="fill"
+              objectFit="cover"
+              className="rounded-full" // Apply rounded-full for circular image
+            />
+          </div>
+          <span className="text-white text-2xl font-bold">FeedAComrade</span>
+        </a>
+
         {/* Desktop Navigation Links and Donate Button */}
         <div className="hidden md:flex items-center space-x-8">
           {navLinks.map((link) => (
@@ -77,12 +91,11 @@ const Navbar = () => {
               key={link.name}
               href={link.href}
               className="text-white hover:text-gray-300 transition-colors duration-200"
-              onClick={() => setMobileMenuOpen(false)} // Close mobile menu if open (for consistency)
+              onClick={() => setMobileMenuOpen(false)}
             >
               {link.name}
             </a>
           ))}
-          {/* Donate Button - now links to /donate page */}
           <a href="/donate">
             <button className="flex items-center space-x-2 px-6 py-2 bg-amber-500 text-white rounded-full shadow-lg hover:bg-amber-600 transition-colors duration-200">
               <FaHandHoldingHeart />
@@ -90,6 +103,7 @@ const Navbar = () => {
             </button>
           </a>
         </div>
+
         {/* Mobile Menu Toggle */}
         <div className="md:hidden">
           <button
@@ -128,20 +142,19 @@ const Navbar = () => {
                 initial="hidden"
                 animate="visible"
                 custom={index}
-                onClick={() => setMobileMenuOpen(false)} // Close menu on link click
+                onClick={() => setMobileMenuOpen(false)}
               >
                 {link.name}
               </motion.a>
             ))}
-            {/* Mobile Donate Button - now links to /donate page */}
             <a href="/donate">
               <motion.button
                 className="flex items-center space-x-2 px-8 py-3 bg-amber-500 text-white rounded-full shadow-lg hover:bg-amber-600 transition-colors duration-200 text-xl font-bold"
                 variants={linkVariants}
                 initial="hidden"
                 animate="visible"
-                custom={navLinks.length} // Ensure it animates after other links
-                onClick={() => setMobileMenuOpen(false)} // Close menu on donate click
+                custom={navLinks.length}
+                onClick={() => setMobileMenuOpen(false)}
               >
                 <FaHandHoldingHeart />
                 <span>Donate</span>
