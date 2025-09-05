@@ -1,9 +1,8 @@
-"use client";
+// app/page.js
 
-export default function HomePage() {
-  return (
-    <main className="h-[100vh] flex items-center justify-center">
-      <p>Welcome to homepage</p>
-    </main>
-  );
+import Home from "./home/page";  // import the homepage component
+
+export default function Page() {
+  return <Home />;  // render the homepage directly
 }
+
