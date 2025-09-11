@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import {
   FaHeart,
-  FaDollarSign,
+  FaMoneyBill,
   FaHandHoldingHeart,
   FaCreditCard,
   FaCalendarAlt,
@@ -13,9 +13,9 @@ import {
 
 const Donate = () => {
   const predefinedAmounts = [
-    { id: "10", amount: 10, label: "$10 - One Week of Meals" },
-    { id: "25", amount: 25, label: "$25 - One Month of Meals" },
-    { id: "50", amount: 50, label: "$50 - Support a Comrade for a Semester" },
+    { id: "10", amount: 10, label: "KES 10 - One Week of Meals" },
+    { id: "25", amount: 25, label: "KES 25 - One Month of Meals" },
+    { id: "50", amount: 50, label: "KES 50 - Support a Comrade for a Semester" },
   ];
 
   const [selectedAmount, setSelectedAmount] = useState(null);
@@ -294,8 +294,8 @@ const Donate = () => {
                   whileHover="hover"
                   whileTap="tap"
                 >
-                  <FaDollarSign className="text-2xl mb-2" />
-                  <span className="text-xl">${option.amount}</span>
+                  <FaMoneyBill className="text-2xl mb-2" />
+                  <span className="text-xl">KES {option.amount}</span>
                   <span className="text-sm mt-1">
                     {option.label.split(" - ")[1]}
                   </span>
@@ -312,7 +312,7 @@ const Donate = () => {
                 Or Enter Custom Amount:
               </label>
               <div className="relative flex items-center">
-                <FaDollarSign className="absolute left-3 text-gray-400" />
+                <FaMoneyBill className="absolute left-3 text-gray-400" />
                 <input
                   type="number"
                   id="custom-amount"
