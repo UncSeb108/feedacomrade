@@ -13,9 +13,9 @@ import {
 
 const Donate = () => {
   const predefinedAmounts = [
-    { id: "10", amount: 10, label: "KES 10 - One Week of Meals" },
-    { id: "25", amount: 25, label: "KES 25 - One Month of Meals" },
-    { id: "50", amount: 50, label: "KES 50 - Support a Comrade for a Semester" },
+    { id: "1000", amount: 1000, label: "KES 1000 - One Week of Meals" },
+    { id: "2500", amount: 2500, label: "KES 2500 - One Month of Meals" },
+    { id: "5000", amount: 5000, label: "KES 5000 - Support a Comrade for a Semester" },
   ];
 
   const [selectedAmount, setSelectedAmount] = useState(null);
@@ -322,7 +322,7 @@ const Donate = () => {
                   className={`w-full pl-10 pr-3 py-2 border ${
                     errors.amount ? "border-red-500" : "border-gray-300"
                   } rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 text-stone-700`}
-                  placeholder="e.g., 75"
+                  placeholder="e.g., 5000"
                   min="1"
                 />
               </div>
