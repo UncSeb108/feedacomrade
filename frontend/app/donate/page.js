@@ -74,17 +74,28 @@ const Donate = () => {
 
   const handleAmountSelect = (amount) => {
     setSelectedAmount(amount);
-    setCustomAmount(""); // Clear custom amount if a predefined one is selected
+    setCustomAmount(String(amount)); // Update custom amount input
     setErrors((prev) => ({ ...prev, amount: "" })); // Clear amount error
   };
 
   const handleCustomAmountChange = (e) => {
     const value = e.target.value;
-    // Allow only numbers and optionally a decimal point
+
+    // Allow only numbers and decimals
     if (/^\d*\.?\d*$/.test(value)) {
       setCustomAmount(value);
-      setSelectedAmount(null); // Deselect predefined amount if custom is typed
-      setErrors((prev) => ({ ...prev, amount: "" })); // Clear amount error
+
+      const numericValue = Number(value);
+
+      // If input matches one of the predefined amounts → highlight that card
+      const matched = predefinedAmounts.find(
+        (item) => item.amount === numericValue
+      );
+      if (matched) {
+        setSelectedAmount(matched.amount);
+      } else {
+        setSelectedAmount(null);
+      }
     }
   };
 
@@ -285,11 +296,10 @@ const Donate = () => {
                   key={option.id}
                   type="button"
                   onClick={() => handleAmountSelect(option.amount)}
-                  className={`p-4 rounded-md border-2 ${
-                    selectedAmount === option.amount
+                  className={`p-4 rounded-md border-2 ${selectedAmount === option.amount
                       ? "bg-amber-500 border-amber-500 text-white shadow-lg"
                       : "bg-emerald-100 border-emerald-100 text-emerald-800 hover:bg-emerald-200 hover:border-emerald-200"
-                  } transition-all duration-200 ease-in-out font-bold flex flex-col items-center`}
+                    } transition-all duration-200 ease-in-out font-bold flex flex-col items-center`}
                   variants={buttonVariants}
                   whileHover="hover"
                   whileTap="tap"
@@ -319,9 +329,8 @@ const Donate = () => {
                   name="customAmount"
                   value={customAmount}
                   onChange={handleCustomAmountChange}
-                  className={`w-full pl-10 pr-3 py-2 border ${
-                    errors.amount ? "border-red-500" : "border-gray-300"
-                  } rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 text-stone-700`}
+                  className={`w-full pl-10 pr-3 py-2 border ${errors.amount ? "border-red-500" : "border-gray-300"
+                    } rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 text-stone-700`}
                   placeholder="e.g., 5000"
                   min="1"
                 />
@@ -347,9 +356,8 @@ const Donate = () => {
                   name="paymentMethod"
                   value={paymentMethod}
                   onChange={handlePaymentMethodChange}
-                  className={`block appearance-none w-full bg-white border ${
-                    errors.paymentMethod ? "border-red-500" : "border-gray-300"
-                  } text-stone-700 py-3 px-4 pr-8 rounded-md leading-tight focus:outline-none focus:bg-white focus:border-emerald-500`}
+                  className={`block appearance-none w-full bg-white border ${errors.paymentMethod ? "border-red-500" : "border-gray-300"
+                    } text-stone-700 py-3 px-4 pr-8 rounded-md leading-tight focus:outline-none focus:bg-white focus:border-emerald-500`}
                   required
                 >
                   <option value="">-- Select Method --</option>
@@ -408,9 +416,8 @@ const Donate = () => {
                             .trim()
                         )
                       } // Format as XXXX XXXX XXXX XXXX
-                      className={`w-full pl-10 pr-3 py-2 border ${
-                        errors.cardNumber ? "border-red-500" : "border-gray-300"
-                      } rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 text-stone-700`}
+                      className={`w-full pl-10 pr-3 py-2 border ${errors.cardNumber ? "border-red-500" : "border-gray-300"
+                        } rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 text-stone-700`}
                       placeholder="XXXX XXXX XXXX XXXX"
                       maxLength="19" // 16 digits + 3 spaces
                       required
@@ -447,11 +454,10 @@ const Donate = () => {
                           }
                           setExpiryDate(value);
                         }}
-                        className={`w-full pl-10 pr-3 py-2 border ${
-                          errors.expiryDate
+                        className={`w-full pl-10 pr-3 py-2 border ${errors.expiryDate
                             ? "border-red-500"
                             : "border-gray-300"
-                        } rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 text-stone-700`}
+                          } rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 text-stone-700`}
                         placeholder="MM/YY"
                         maxLength="5"
                         required
@@ -480,9 +486,8 @@ const Donate = () => {
                         onChange={(e) =>
                           setCvv(e.target.value.replace(/\D/g, ""))
                         } // Only digits
-                        className={`w-full pl-10 pr-3 py-2 border ${
-                          errors.cvv ? "border-red-500" : "border-gray-300"
-                        } rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 text-stone-700`}
+                        className={`w-full pl-10 pr-3 py-2 border ${errors.cvv ? "border-red-500" : "border-gray-300"
+                          } rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 text-stone-700`}
                         placeholder="XXX"
                         maxLength="4"
                         required
@@ -524,11 +529,10 @@ const Donate = () => {
                       name="mpesaPhoneNumber"
                       value={mpesaPhoneNumber}
                       onChange={(e) => setMpesaPhoneNumber(e.target.value)}
-                      className={`w-full pl-10 pr-3 py-2 border ${
-                        errors.mpesaPhoneNumber
+                      className={`w-full pl-10 pr-3 py-2 border ${errors.mpesaPhoneNumber
                           ? "border-red-500"
                           : "border-gray-300"
-                      } rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 text-stone-700`}
+                        } rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 text-stone-700`}
                       placeholder="e.g., +2547XXXXXXXX"
                       required
                     />
