@@ -327,7 +327,7 @@ const Hero = () => {
           className="mb-4 text-4xl font-extrabold leading-none text-white md:text-5xl lg:text-7xl flex items-center justify-center gap-3"
           variants={itemVariants}
         >
-          No Student Should Study on an Empty Stomach
+          Stopping Campus Hunger Before it Kills Futures
         </motion.h1>
         <motion.p
           className="mb-6 text-xl text-gray-300 md:text-2xl"
